@@ -1,13 +1,12 @@
 # Kendra Cooke
 
-Personal site. One page, no build step. GitHub Pages serves `index.html` from the main branch.
+Personal site at krcooke.com. One page, no build step. GitHub Pages serves `index.html` from the main branch.
 
-## Turning on the contact form
+## Contact form
 
-The Selected work and Email links open a form. To send it to your inbox:
+The Selected work and Email links open a form that sends through Web3Forms to Kendra's inbox. The access key in `index.html` can only send messages to that inbox, and the address never appears on the page.
 
-1. Create a free form at formspree.io with the email you want messages to go to.
-2. Copy the form's endpoint, which looks like `https://formspree.io/f/abcdwxyz`.
-3. In `index.html`, search for `FORM_ENDPOINT=''` and paste the endpoint between the quotes.
+## Files
 
-Your email address never appears in the page.
+- `index.html`: the site
+- `vibefit-demo.mp4`: the VibeFit demo film, played in a lightbox from the Explorations section

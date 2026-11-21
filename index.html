@@ -207,6 +207,15 @@ h1,h2,h3{font-family:var(--display);font-weight:300;text-wrap:balance;margin:0}
 .modal-x{position:absolute;top:14px;right:16px;border:0;background:none;font-size:28px;line-height:1;color:var(--ink-soft);cursor:pointer}
 .modal-x:hover{color:var(--red)}
 #ask-form{display:grid;gap:16px}
+#code-form{display:grid;gap:6px;margin:0 0 22px}#code-form[hidden],#ask-form[hidden]{display:none}
+#code-form label{font-size:13px;font-weight:500}
+.code-row{display:flex;gap:8px}
+#code-in{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:0;text-transform:uppercase;letter-spacing:.04em}
+#code-in::placeholder{text-transform:none;letter-spacing:0;color:var(--ink-faint)}
+#code-in:focus{outline:2px solid var(--red);outline-offset:-1px;border-color:transparent}
+.code-ask{margin:0;font-size:15px;color:var(--ink-soft);border-top:1px solid var(--rule);padding-top:18px}
+.link-btn{font:inherit;border:0;background:none;padding:0;color:var(--ink);text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:3px;cursor:pointer}
+.link-btn:hover{color:var(--red)}
 #ask-form label{display:grid;gap:6px;font-size:13px;font-weight:500}
 #ask-form .opt{font-weight:400;color:var(--ink-faint)}
 #ask-form input,#ask-form textarea{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:0}
@@ -400,11 +409,18 @@ h1,h2,h3{font-family:var(--display);font-weight:300;text-wrap:balance;margin:0}
   <div class="modal-scrim" data-close></div>
   <div class="modal-card">
     <button class="modal-x" type="button" data-close aria-label="Close">×</button>
-    <h2 id="ask-h" data-v="work">Let’s talk through the work</h2>
+    <h2 id="ask-h" data-v="work">Selected work</h2>
+    <h2 id="ask-h3" data-v="request" hidden>Let’s talk through the work</h2>
     <h2 id="ask-h2" data-v="contact" hidden>Say hello</h2>
-    <p class="modal-p" data-v="work">I share selected work in conversation, so I can walk you through the thinking, the outcomes and what changed. Tell me a little about yourself and what you’d like to see, and I’ll be in touch.</p>
+    <p class="modal-p" data-v="work">These are stories I like to walk through in person. If you have an access code, come on in.</p>
+    <form id="code-form" data-v="work" method="post" action="https://work.krcooke.com/login" autocomplete="off">
+      <label for="code-in">Access code</label>
+      <div class="code-row"><input id="code-in" name="code" required autocapitalize="characters" spellcheck="false" placeholder="e.g. ANNA-L2X-7QK4MP2H"><button class="ask-send" type="submit">Enter</button></div>
+    </form>
+    <p class="code-ask" data-v="work">No code yet? <button type="button" class="link-btn" data-switch="request">Ask me for one</button></p>
+    <p class="modal-p" data-v="request" hidden>I share selected work in conversation, so I can walk you through the thinking, the outcomes and what changed. Tell me a little about yourself and what you’d like to see, and I’ll be in touch.</p>
     <p class="modal-p" data-v="contact" hidden>Send me a note and I’ll get back to you.</p>
-    <form id="ask-form" novalidate>
+    <form id="ask-form" data-v="request contact" novalidate>
       <input type="hidden" name="access_key" value="b67009e8-09fc-4e19-9749-30d4d67a75b0">
       <input type="hidden" name="subject" id="ask-topic" value="Selected work request from your site">
       <input type="hidden" name="from_name" value="kendracooke site">
@@ -686,13 +702,16 @@ h1,h2,h3{font-family:var(--display);font-weight:300;text-wrap:balance;margin:0}
     const FORM_ENDPOINT='https://api.web3forms.com/submit';
     const m=document.getElementById('ask'),f=document.getElementById('ask-form'),st=document.getElementById('ask-status'),btn=f.querySelector('.ask-send');let last=null;
     function open(kind){last=document.activeElement;m.hidden=false;document.body.style.overflow='hidden';
-      m.querySelectorAll('[data-v]').forEach(el=>el.hidden=el.dataset.v!==kind);
-      m.setAttribute('aria-labelledby',kind==='work'?'ask-h':'ask-h2');
-      document.getElementById('ask-topic').value=kind==='work'?'Selected work request from your site':'Hello from your site';
-      document.getElementById('ask-msg').placeholder=kind==='work'?'What kind of work would you like to talk through?':'';
-      st.textContent='';setTimeout(()=>document.getElementById('ask-name').focus(),30);}
+      m.querySelectorAll('[data-v]').forEach(el=>el.hidden=!el.dataset.v.split(' ').includes(kind));
+      m.setAttribute('aria-labelledby',kind==='work'?'ask-h':kind==='request'?'ask-h3':'ask-h2');
+      document.getElementById('ask-topic').value=kind==='request'?'Selected work request from your site':'Hello from your site';
+      document.getElementById('ask-msg').placeholder=kind==='request'?'What kind of work would you like to talk through?':'';
+      st.textContent='';setTimeout(()=>document.getElementById(kind==='work'?'code-in':'ask-name').focus(),30);}
     function close(){m.hidden=true;document.body.style.overflow='';last&&last.focus();}
     document.querySelectorAll('[data-form]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();open(a.dataset.form)}));
+    m.querySelectorAll('[data-switch]').forEach(b=>b.addEventListener('click',()=>open(b.dataset.switch)));
+    // links from the selected-work sign-in page: krcooke.com/#request opens the request form, #work the code box
+    if(location.hash==='#request')open('request');else if(location.hash==='#work')open('work');
     m.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',close));
     document.addEventListener('keydown',e=>{if(!m.hidden&&e.key==='Escape')close();});
     f.addEventListener('submit',async e=>{
